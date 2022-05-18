@@ -4,7 +4,6 @@ go 1.18
 
 require (
 	github.com/blang/semver v3.5.1+incompatible
-	github.com/davecgh/go-spew v1.1.1
 	github.com/google/go-github/v30 v30.1.0
 	github.com/inconshreveable/go-update v0.0.0-20160112193335-8152e7eb6ccf
 	github.com/tcnksm/go-gitconfig v0.1.2
