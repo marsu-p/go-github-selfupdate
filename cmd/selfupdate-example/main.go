@@ -3,9 +3,10 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/blang/semver"
-	"github.com/rhysd/go-github-selfupdate/selfupdate"
 	"os"
+
+	"github.com/blang/semver"
+	"github.com/marsu-p/go-github-selfupdate/selfupdate"
 )
 
 const version = "1.2.3"
@@ -37,7 +38,7 @@ func main() {
 	help := flag.Bool("help", false, "Show this help")
 	ver := flag.Bool("version", false, "Show version")
 	update := flag.Bool("selfupdate", false, "Try go-github-selfupdate via GitHub")
-	slug := flag.String("slug", "rhysd/go-github-selfupdate", "Repository of this command")
+	slug := flag.String("slug", "marsu-p/go-github-selfupdate", "Repository of this command")
 
 	flag.Usage = usage
 	flag.Parse()

@@ -1,3 +1,7 @@
+## [v1.2.4] - 2022-05-18
+
+- fork by marsu-p
+
 ## [v1.2.3] - 2021-01-13
 
 - Fix security issues in dependencies; CVE-2020-16845, CVE-2019-11840, CVE-2020-14040 (Thanks to [@bhamail](https://github.com/bhamail)).
@@ -32,9 +36,9 @@
 First release! :tada:
 
 
-[v1.2.3]: https://github.com/rhysd/go-github-selfupdate/compare/v1.2.2...v1.2.3
-[v1.2.2]: https://github.com/rhysd/go-github-selfupdate/compare/v1.2.1...v1.2.2
-[v1.2.1]: https://github.com/rhysd/go-github-selfupdate/compare/v1.2.0...v1.2.1
-[v1.2.0]: https://github.com/rhysd/go-github-selfupdate/compare/go-get-release...v1.2.0
-[v1.1.0]: https://github.com/rhysd/go-github-selfupdate/compare/v1.0.0...v1.1.0
-[v1.0.0]: https://github.com/rhysd/go-github-selfupdate/compare/example-1.2.4...v1.0.0
+[v1.2.3]: https://github.com/marsu-p/go-github-selfupdate/compare/v1.2.2...v1.2.3
+[v1.2.2]: https://github.com/marsu-p/go-github-selfupdate/compare/v1.2.1...v1.2.2
+[v1.2.1]: https://github.com/marsu-p/go-github-selfupdate/compare/v1.2.0...v1.2.1
+[v1.2.0]: https://github.com/marsu-p/go-github-selfupdate/compare/go-get-release...v1.2.0
+[v1.1.0]: https://github.com/marsu-p/go-github-selfupdate/compare/v1.0.0...v1.1.0
+[v1.0.0]: https://github.com/marsu-p/go-github-selfupdate/compare/example-1.2.4...v1.0.0

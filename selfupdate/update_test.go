@@ -33,12 +33,12 @@ func TestUpdateCommand(t *testing.T) {
 	}
 
 	for _, slug := range []string{
-		"rhysd-test/test-release-zip",
-		"rhysd-test/test-release-tar",
-		"rhysd-test/test-release-gzip",
-		"rhysd-test/test-release-tar-xz",
-		"rhysd-test/test-release-xz",
-		"rhysd-test/test-release-contain-version",
+		"marsu-p-test/test-release-zip",
+		"marsu-p-test/test-release-tar",
+		"marsu-p-test/test-release-gzip",
+		"marsu-p-test/test-release-tar-xz",
+		"marsu-p-test/test-release-xz",
+		"marsu-p-test/test-release-contain-version",
 	} {
 		t.Run(slug, func(t *testing.T) {
 			setupTestBinary()
@@ -87,7 +87,7 @@ func TestUpdateViaSymlink(t *testing.T) {
 
 	latest := semver.MustParse("1.2.3")
 	prev := semver.MustParse("1.2.2")
-	rel, err := UpdateCommand(symPath, prev, "rhysd-test/test-release-zip")
+	rel, err := UpdateCommand(symPath, prev, "marsu-p-test/test-release-zip")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -167,7 +167,7 @@ func TestNotExistingCommandPath(t *testing.T) {
 func TestNoReleaseFoundForUpdate(t *testing.T) {
 	v := semver.MustParse("1.0.0")
 	fake := filepath.FromSlash("./testdata/fake-executable")
-	rel, err := UpdateCommand(fake, v, "rhysd/misc")
+	rel, err := UpdateCommand(fake, v, "marsu-p/misc")
 	if err != nil {
 		t.Fatal("No release should not make an error:", err)
 	}
@@ -193,7 +193,7 @@ func TestCurrentIsTheLatest(t *testing.T) {
 	defer teardownTestBinary()
 
 	v := semver.MustParse("1.2.3")
-	rel, err := UpdateCommand("github-release-test", v, "rhysd-test/test-release-zip")
+	rel, err := UpdateCommand("github-release-test", v, "marsu-p-test/test-release-zip")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -217,7 +217,7 @@ func TestBrokenBinaryUpdate(t *testing.T) {
 	}
 
 	fake := filepath.FromSlash("./testdata/fake-executable")
-	_, err := UpdateCommand(fake, semver.MustParse("1.2.2"), "rhysd-test/test-incorrect-release")
+	_, err := UpdateCommand(fake, semver.MustParse("1.2.2"), "marsu-p-test/test-incorrect-release")
 	if err == nil {
 		t.Fatal("Error should occur for broken package")
 	}
@@ -228,7 +228,7 @@ func TestBrokenBinaryUpdate(t *testing.T) {
 
 func TestInvalidSlugForUpdate(t *testing.T) {
 	fake := filepath.FromSlash("./testdata/fake-executable")
-	_, err := UpdateCommand(fake, semver.MustParse("1.0.0"), "rhysd/")
+	_, err := UpdateCommand(fake, semver.MustParse("1.0.0"), "marsu-p/")
 	if err == nil {
 		t.Fatal("Unknown repo should cause an error")
 	}
@@ -238,7 +238,7 @@ func TestInvalidSlugForUpdate(t *testing.T) {
 }
 
 func TestInvalidAssetURL(t *testing.T) {
-	err := UpdateTo("https://github.com/rhysd/non-existing-repo/releases/download/v1.2.3/foo.zip", "foo")
+	err := UpdateTo("https://github.com/marsu-p/non-existing-repo/releases/download/v1.2.3/foo.zip", "foo")
 	if err == nil {
 		t.Fatal("Error should occur for URL not found")
 	}
@@ -248,7 +248,7 @@ func TestInvalidAssetURL(t *testing.T) {
 }
 
 func TestBrokenAsset(t *testing.T) {
-	asset := "https://github.com/rhysd-test/test-incorrect-release/releases/download/invalid/broken-zip.zip"
+	asset := "https://github.com/marsu-p-test/test-incorrect-release/releases/download/invalid/broken-zip.zip"
 	err := UpdateTo(asset, "foo")
 	if err == nil {
 		t.Fatal("Error should occur for URL not found")
@@ -332,7 +332,7 @@ func TestUpdateFromGitHubPrivateRepo(t *testing.T) {
 
 	latest := semver.MustParse("1.2.3")
 	prev := semver.MustParse("1.2.2")
-	rel, err := up.UpdateCommand("github-release-test", prev, "rhysd/private-release-test")
+	rel, err := up.UpdateCommand("github-release-test", prev, "marsu-p/private-release-test")
 	if err != nil {
 		t.Fatal(err)
 	}

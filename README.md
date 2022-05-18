@@ -38,7 +38,7 @@ And small wrapper CLIs are provided:
 
 [Slide at GoCon 2018 Spring (Japanese)](https://speakerdeck.com/rhysd/go-selfupdate-github-de-turuwozi-ji-atupudetosuru)
 
-[go-github-selfupdate]: https://github.com/rhysd/go-github-selfupdate
+[go-github-selfupdate]: https://github.com/marsu-p/go-github-selfupdate
 [GitHub Releases API]: https://developer.github.com/v3/repos/releases/
 
 
@@ -50,7 +50,7 @@ Example to understand what this library does is prepared as [CLI](./cmd/selfupda
 Install it at first.
 
 ```
-$ go get -u github.com/rhysd/go-github-selfupdate/cmd/selfupdate-example
+$ go get -u github.com/marsu-p/go-github-selfupdate/cmd/selfupdate-example
 ```
 
 And check the version by `-version`. `-help` flag is also available to know all flags.
@@ -106,7 +106,7 @@ Following is the easiest way to use this package.
 import (
     "log"
     "github.com/blang/semver"
-    "github.com/rhysd/go-github-selfupdate/selfupdate"
+    "github.com/marsu-p/go-github-selfupdate/selfupdate"
 )
 
 const version = "1.2.3"
@@ -134,7 +134,7 @@ Following asks user to update or not.
 import (
     "bufio"
     "github.com/blang/semver"
-    "github.com/rhysd/go-github-selfupdate/selfupdate"
+    "github.com/marsu-p/go-github-selfupdate/selfupdate"
     "log"
     "os"
 )
@@ -196,7 +196,7 @@ Following is an example of usage with GitHub Enterprise.
 import (
     "log"
     "github.com/blang/semver"
-    "github.com/rhysd/go-github-selfupdate/selfupdate"
+    "github.com/marsu-p/go-github-selfupdate/selfupdate"
 )
 
 const version = "1.2.3"
