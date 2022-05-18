@@ -12,7 +12,7 @@ import (
 )
 
 func TestDetectReleaseWithVersionPrefix(t *testing.T) {
-	r, ok, err := DetectLatest("marsu-p/github-clone-all")
+	r, ok, err := DetectLatest("rhysd/github-clone-all")
 	if err != nil {
 		t.Fatal("Fetch failed:", err)
 	}
@@ -46,7 +46,7 @@ func TestDetectReleaseWithVersionPrefix(t *testing.T) {
 	if r.PublishedAt.IsZero() {
 		t.Error("Release time is unexpectedly zero")
 	}
-	if r.RepoOwner != "marsu-p" {
+	if r.RepoOwner != "rhysd" {
 		t.Error("Repo owner is not correct:", r.RepoOwner)
 	}
 	if r.RepoName != "github-clone-all" {
@@ -56,7 +56,7 @@ func TestDetectReleaseWithVersionPrefix(t *testing.T) {
 
 func TestDetectVersionExisting(t *testing.T) {
 	testVersion := "v2.2.0"
-	r, ok, err := DetectVersion("marsu-p/github-clone-all", testVersion)
+	r, ok, err := DetectVersion("rhysd/github-clone-all", testVersion)
 	if err != nil {
 		t.Fatal("Fetch failed:", err)
 	}
@@ -69,7 +69,7 @@ func TestDetectVersionExisting(t *testing.T) {
 }
 
 func TestDetectVersionNotExisting(t *testing.T) {
-	r, ok, err := DetectVersion("marsu-p/github-clone-all", "foobar")
+	r, ok, err := DetectVersion("rhysd/github-clone-all", "foobar")
 	if err != nil {
 		t.Fatal("Fetch failed:", err)
 	}
@@ -86,11 +86,11 @@ func TestDetectReleasesForVariousArchives(t *testing.T) {
 		slug   string
 		prefix string
 	}{
-		{"marsu-p-test/test-release-zip", "v"},
-		{"marsu-p-test/test-release-tar", "v"},
-		{"marsu-p-test/test-release-gzip", "v"},
-		{"marsu-p-test/test-release-xz", "release-v"},
-		{"marsu-p-test/test-release-tar-xz", "release-"},
+		{"rhysd-test/test-release-zip", "v"},
+		{"rhysd-test/test-release-tar", "v"},
+		{"rhysd-test/test-release-gzip", "v"},
+		{"rhysd-test/test-release-xz", "release-v"},
+		{"rhysd-test/test-release-tar-xz", "release-"},
 	} {
 		t.Run(tc.slug, func(t *testing.T) {
 			r, ok, err := DetectLatest(tc.slug)
@@ -128,8 +128,8 @@ func TestDetectReleasesForVariousArchives(t *testing.T) {
 			if r.PublishedAt.IsZero() {
 				t.Error("Release time is unexpectedly zero")
 			}
-			if r.RepoOwner != "marsu-p-test" {
-				t.Error("Repo owner should be marsu-p-test:", r.RepoOwner)
+			if r.RepoOwner != "rhysd-test" {
+				t.Error("Repo owner should be rhysd-test:", r.RepoOwner)
 			}
 			if !strings.HasPrefix(r.RepoName, "test-release-") {
 				t.Error("Repo name was not properly detectd:", r.RepoName)
@@ -139,7 +139,7 @@ func TestDetectReleasesForVariousArchives(t *testing.T) {
 }
 
 func TestDetectReleaseButNoAsset(t *testing.T) {
-	_, ok, err := DetectLatest("marsu-p/clever-f.vim")
+	_, ok, err := DetectLatest("rhysd/clever-f.vim")
 	if err != nil {
 		t.Fatal("Fetch failed:", err)
 	}
@@ -149,7 +149,7 @@ func TestDetectReleaseButNoAsset(t *testing.T) {
 }
 
 func TestDetectNoRelease(t *testing.T) {
-	_, ok, err := DetectLatest("marsu-p/clever-f.vim")
+	_, ok, err := DetectLatest("rhysd/clever-f.vim")
 	if err != nil {
 		t.Fatal("Fetch failed:", err)
 	}
@@ -179,7 +179,7 @@ func TestInvalidSlug(t *testing.T) {
 }
 
 func TestNonExistingRepo(t *testing.T) {
-	v, ok, err := DetectLatest("marsu-p/non-existing-repo")
+	v, ok, err := DetectLatest("rhysd/non-existing-repo")
 	if err != nil {
 		t.Fatal("Non-existing repo should not cause an error:", v)
 	}
@@ -189,7 +189,7 @@ func TestNonExistingRepo(t *testing.T) {
 }
 
 func TestNoReleaseFound(t *testing.T) {
-	_, ok, err := DetectLatest("marsu-p/misc")
+	_, ok, err := DetectLatest("rhysd/misc")
 	if err != nil {
 		t.Fatal("Repo having no release should not cause an error:", err)
 	}
@@ -250,6 +250,8 @@ func TestFindReleaseAndAsset(t *testing.T) {
 		rels            *github.RepositoryRelease
 		targetVersion   string
 		filters         []*regexp.Regexp
+		allowPrerelease bool
+		allowDraft      bool
 		expectedAsset   string
 		expectedVersion string
 		expectedFound   bool
@@ -266,6 +268,8 @@ func TestFindReleaseAndAsset(t *testing.T) {
 	url1 := "https://asset1"
 	url2 := "https://asset2"
 	url11 := "https://asset11"
+	draft := true
+	prerelease := true
 	for _, fixture := range []findReleaseAndAssetFixture{
 		{
 			name:          "empty fixture",
@@ -433,8 +437,70 @@ func TestFindReleaseAndAsset(t *testing.T) {
 			},
 			expectedFound: false,
 		},
+		{
+			name: "find asset, no draft",
+			rels: &github.RepositoryRelease{
+				Name:    &rel11,
+				TagName: &v11,
+				Draft:   &draft,
+				Assets: []*github.ReleaseAsset{
+					{
+						Name: &asset11,
+						URL:  &url11,
+					},
+				},
+			},
+			expectedFound: false,
+		},
+		{
+			name: "find asset, with draft",
+			rels: &github.RepositoryRelease{
+				Name:    &rel11,
+				TagName: &v11,
+				Draft:   &draft,
+				Assets: []*github.ReleaseAsset{
+					{
+						Name: &asset11,
+						URL:  &url11,
+					},
+				},
+			},
+			allowDraft:    true,
+			expectedFound: true,
+		},
+		{
+			name: "find asset, no pre release",
+			rels: &github.RepositoryRelease{
+				Name:       &rel11,
+				TagName:    &v11,
+				Prerelease: &prerelease,
+				Assets: []*github.ReleaseAsset{
+					{
+						Name: &asset11,
+						URL:  &url11,
+					},
+				},
+			},
+			expectedFound: false,
+		},
+		{
+			name: "find asset, with pre release",
+			rels: &github.RepositoryRelease{
+				Name:       &rel11,
+				TagName:    &v11,
+				Prerelease: &prerelease,
+				Assets: []*github.ReleaseAsset{
+					{
+						Name: &asset11,
+						URL:  &url11,
+					},
+				},
+			},
+			allowPrerelease: true,
+			expectedFound:   true,
+		},
 	} {
-		asset, ver, found := findAssetFromRelease(fixture.rels, []string{".gz"}, fixture.targetVersion, fixture.filters)
+		asset, ver, found := findAssetFromRelease(fixture.rels, []string{".gz"}, fixture.targetVersion, fixture.filters, fixture.allowPrerelease, fixture.allowDraft)
 		if fixture.expectedFound {
 			if !found {
 				t.Errorf("expected to find an asset for this fixture: %q", fixture.name)

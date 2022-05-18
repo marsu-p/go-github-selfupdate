@@ -15,10 +15,12 @@ import (
 // Updater is responsible for managing the context of self-update.
 // It contains GitHub client and its context.
 type Updater struct {
-	api       *github.Client
-	apiCtx    context.Context
-	validator Validator
-	filters   []*regexp.Regexp
+	api             *github.Client
+	apiCtx          context.Context
+	validator       Validator
+	filters         []*regexp.Regexp
+	allowPrerelease bool
+	allowDraft      bool
 }
 
 // Config represents the configuration of self-update.
@@ -33,6 +35,10 @@ type Config struct {
 	EnterpriseUploadURL string
 	// Validator represents types which enable additional validation of downloaded release.
 	Validator Validator
+	// AllowPrerelease allows the updater to use releases marked as pre-release
+	AllowPrerelease bool
+	// AllowDraft allows the updater to use releases in draft
+	AllowDraft bool
 	// Filters are regexp used to filter on specific assets for releases with multiple assets.
 	// An asset is selected if it matches any of those, in addition to the regular tag, os, arch, extensions.
 	// Please make sure that your filter(s) uniquely match an asset.
@@ -50,6 +56,8 @@ func newHTTPClient(ctx context.Context, token string) *http.Client {
 // NewUpdater creates a new updater instance. It initializes GitHub API client.
 // If you set your API token to $GITHUB_TOKEN, the client will use it.
 func NewUpdater(config Config) (*Updater, error) {
+	up := new(Updater)
+
 	token := config.APIToken
 	if token == "" {
 		token = os.Getenv("GITHUB_TOKEN")
@@ -57,8 +65,8 @@ func NewUpdater(config Config) (*Updater, error) {
 	if token == "" {
 		token, _ = gitconfig.GithubToken()
 	}
-	ctx := context.Background()
-	hc := newHTTPClient(ctx, token)
+	up.apiCtx = context.Background()
+	hc := newHTTPClient(up.apiCtx, token)
 
 	filtersRe := make([]*regexp.Regexp, 0, len(config.Filters))
 	for _, filter := range config.Filters {
@@ -68,10 +76,15 @@ func NewUpdater(config Config) (*Updater, error) {
 		}
 		filtersRe = append(filtersRe, re)
 	}
+	up.filters = filtersRe
+
+	up.validator = config.Validator
+	up.allowDraft = config.AllowDraft
+	up.allowPrerelease = config.AllowPrerelease
 
 	if config.EnterpriseBaseURL == "" {
-		client := github.NewClient(hc)
-		return &Updater{api: client, apiCtx: ctx, validator: config.Validator, filters: filtersRe}, nil
+		up.api = github.NewClient(hc)
+		return up, nil
 	}
 
 	u := config.EnterpriseUploadURL
@@ -82,7 +95,8 @@ func NewUpdater(config Config) (*Updater, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &Updater{api: client, apiCtx: ctx, validator: config.Validator, filters: filtersRe}, nil
+	up.api = client
+	return up, nil
 }
 
 // DefaultUpdater creates a new updater instance with default configuration.

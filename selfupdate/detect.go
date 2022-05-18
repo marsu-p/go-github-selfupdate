@@ -12,19 +12,18 @@ import (
 
 var reVersion = regexp.MustCompile(`\d+\.\d+\.\d+`)
 
-func findAssetFromRelease(rel *github.RepositoryRelease,
-	suffixes []string, targetVersion string, filters []*regexp.Regexp) (*github.ReleaseAsset, semver.Version, bool) {
+func findAssetFromRelease(rel *github.RepositoryRelease, suffixes []string, targetVersion string, filters []*regexp.Regexp, allowPrerelease, allowDraft bool) (*github.ReleaseAsset, semver.Version, bool) {
 
 	if targetVersion != "" && targetVersion != rel.GetTagName() {
 		log.Println("Skip", rel.GetTagName(), "not matching to specified version", targetVersion)
 		return nil, semver.Version{}, false
 	}
 
-	if targetVersion == "" && rel.GetDraft() {
+	if targetVersion == "" && rel.GetDraft() && !allowDraft {
 		log.Println("Skip draft version", rel.GetTagName())
 		return nil, semver.Version{}, false
 	}
-	if targetVersion == "" && rel.GetPrerelease() {
+	if targetVersion == "" && rel.GetPrerelease() && !allowPrerelease {
 		log.Println("Skip pre-release version", rel.GetTagName())
 		return nil, semver.Version{}, false
 	}
@@ -87,9 +86,7 @@ func findValidationAsset(rel *github.RepositoryRelease, validationName string) (
 	return nil, false
 }
 
-func findReleaseAndAsset(rels []*github.RepositoryRelease,
-	targetVersion string,
-	filters []*regexp.Regexp) (*github.RepositoryRelease, *github.ReleaseAsset, semver.Version, bool) {
+func findReleaseAndAsset(rels []*github.RepositoryRelease, targetVersion string, filters []*regexp.Regexp, allowPrerelease, allowDraft bool) (*github.RepositoryRelease, *github.ReleaseAsset, semver.Version, bool) {
 	// Generate candidates
 	suffixes := make([]string, 0, 2*7*2)
 	for _, sep := range []rune{'_', '-'} {
@@ -111,7 +108,7 @@ func findReleaseAndAsset(rels []*github.RepositoryRelease,
 	// Returned list from GitHub API is in the order of the date when created.
 	//   ref: https://github.com/marsu-p/go-github-selfupdate/issues/11
 	for _, rel := range rels {
-		if a, v, ok := findAssetFromRelease(rel, suffixes, targetVersion, filters); ok {
+		if a, v, ok := findAssetFromRelease(rel, suffixes, targetVersion, filters, allowPrerelease, allowDraft); ok {
 			// Note: any version with suffix is less than any version without suffix.
 			// e.g. 0.0.1 > 0.0.1-beta
 			if release == nil || v.GTE(ver) {
@@ -159,7 +156,7 @@ func (up *Updater) DetectVersion(slug string, version string) (release *Release,
 		return nil, false, err
 	}
 
-	rel, asset, ver, found := findReleaseAndAsset(rels, version, up.filters)
+	rel, asset, ver, found := findReleaseAndAsset(rels, version, up.filters, up.allowPrerelease, up.allowDraft)
 	if !found {
 		return nil, false, nil
 	}
