@@ -8,7 +8,7 @@ import (
 	"testing"
 
 	"github.com/blang/semver"
-	"github.com/google/go-github/v30/github"
+	"github.com/google/go-github/v44/github"
 )
 
 func TestDetectReleaseWithVersionPrefix(t *testing.T) {
@@ -466,6 +466,7 @@ func TestFindReleaseAndAsset(t *testing.T) {
 				},
 			},
 			allowDraft:    true,
+			expectedAsset: asset11,
 			expectedFound: true,
 		},
 		{
@@ -497,27 +498,31 @@ func TestFindReleaseAndAsset(t *testing.T) {
 				},
 			},
 			allowPrerelease: true,
+			expectedAsset:   asset11,
 			expectedFound:   true,
 		},
 	} {
-		asset, ver, found := findAssetFromRelease(fixture.rels, []string{".gz"}, fixture.targetVersion, fixture.filters, fixture.allowPrerelease, fixture.allowDraft)
-		if fixture.expectedFound {
-			if !found {
-				t.Errorf("expected to find an asset for this fixture: %q", fixture.name)
-				continue
+		t.Run(fixture.name, func(t *testing.T) {
+
+			asset, ver, found := findAssetFromRelease(fixture.rels, []string{".gz"}, fixture.targetVersion, fixture.filters, fixture.allowPrerelease, fixture.allowDraft)
+			if fixture.expectedFound {
+				if !found {
+					t.Errorf("expected to find an asset for this fixture: %q", fixture.name)
+					return
+				}
+				if asset.Name == nil {
+					t.Errorf("invalid asset struct returned from fixture: %q, got: %v", fixture.name, asset)
+					return
+				}
+				if *asset.Name != fixture.expectedAsset {
+					t.Errorf("expected asset %q in fixture: %q, got: %s", fixture.expectedAsset, fixture.name, *asset.Name)
+					return
+				}
+				t.Logf("asset %v, %v", asset, ver)
+			} else if found {
+				t.Errorf("expected not to find an asset for this fixture: %q, but got: %v", fixture.name, asset)
 			}
-			if asset.Name == nil {
-				t.Errorf("invalid asset struct returned from fixture: %q, got: %v", fixture.name, asset)
-				continue
-			}
-			if *asset.Name != fixture.expectedAsset {
-				t.Errorf("expected asset %q in fixture: %q, got: %s", fixture.expectedAsset, fixture.name, *asset.Name)
-				continue
-			}
-			t.Logf("asset %v, %v", asset, ver)
-		} else if found {
-			t.Errorf("expected not to find an asset for this fixture: %q, but got: %v", fixture.name, asset)
-		}
+		})
 	}
 
 }

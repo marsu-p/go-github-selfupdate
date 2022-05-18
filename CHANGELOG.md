@@ -1,6 +1,8 @@
 ## [v1.2.4] - 2022-05-18
 
 - fork by marsu-p
+- support for Draft and PreRelease releases
+- Update `go-github` dependency to v44.1.0
 
 ## [v1.2.3] - 2021-01-13
 
